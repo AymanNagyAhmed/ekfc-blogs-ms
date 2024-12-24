@@ -1,26 +1,24 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { databaseConfigOptions } from '@/config/database.config';
-import { UsersModule } from '@/modules/users/users.module';
-import { AuthModule } from '@/modules/auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { PostsModule } from '@/modules/posts/posts.module';
+import { DatabaseModule } from '@/config/database/database.module';
+import { validationSchema } from '@/config/env.validation';
+import { RmqModule } from '@/config/rmq/rmq.module';
+import { BLOGS_SERVICE } from '@/common/constants/services';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
-    // Load and validate environment variables
     ConfigModule.forRoot({
       isGlobal: true,
-      cache: true,
+      validationSchema
     }),
-    
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: databaseConfigOptions,
-      inject: [ConfigService],
-    }),
-    // Feature modules
-    UsersModule,
-    AuthModule,
+    DatabaseModule,
+    PostsModule,
+    RmqModule.register({ name: BLOGS_SERVICE }),
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

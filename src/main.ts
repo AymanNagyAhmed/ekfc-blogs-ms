@@ -7,25 +7,26 @@ import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter'
 import { TransformResponseInterceptor } from '@/common/interceptors/transform-response.interceptor';
 import { API } from '@/common/constants/api.constants';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RmqService } from '@/config/rmq/rmq.service';
 
 async function bootstrap() {
+  // Create a hybrid application that can handle both HTTP and microservice requests
   const app = await NestFactory.create(AppModule);
-  
+
   // Global prefix
   app.setGlobalPrefix(API.PREFIX);
 
-  // Global exception filter
+  // Global pipes, filters, and interceptors
   app.useGlobalFilters(new GlobalExceptionFilter());
-
-  // Global response transformer
   app.useGlobalInterceptors(new TransformResponseInterceptor());
+  app.useGlobalGuards(new AuthGuard(app.get(Reflector)));
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('User managementmanagement API')
-    .setDescription('API documentation for user management management system')
+    .setTitle('Post managementmanagement API')
+    .setDescription('API documentation for post management management system')
     .setVersion('1.0')
-    .addTag('users')
+    .addTag('posts')
     .addBearerAuth()
     .build();
 
@@ -33,13 +34,19 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const configService = app.get(ConfigService);
-  app.useGlobalGuards(new AuthGuard(app.get(Reflector)));
+  const rmqService = app.get<RmqService>(RmqService);
+
+  // Connect to RabbitMQ
+  app.connectMicroservice(rmqService.getOptions('BLOGS'));
   
-  const port = configService.get<number>('PORT', 4003);
+  // Start all microservices and then listen for HTTP requests
+  await app.startAllMicroservices();
   
+  const port = configService.get<number>('PORT', 4004);
   await app.listen(port);
   
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(`🚀 HTTP server running on: http://localhost:${port}`);
+  console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(`🐰 RabbitMQ microservice is running`);
 }
 bootstrap();

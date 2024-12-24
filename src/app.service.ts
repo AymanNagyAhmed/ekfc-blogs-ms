@@ -5,10 +5,10 @@ import { ApiResponseUtil } from '@/common/utils/api-response.util';
 @Injectable()
 export class AppService {
   async getHello(): Promise<ApiResponse<string>> {
-    const data = 'Hello World!';
+    const data = 'Blogs micro service is running';
     return ApiResponseUtil.success(
       data,
-      'Welcome message retrieved successfully',
+      'Blogs micro service is running',
       '/api'
     );
   }

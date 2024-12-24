@@ -1,6 +1,7 @@
 import * as Joi from 'joi';
 
 export const validationSchema = Joi.object({
+
   // Application
   PORT: Joi.number().default(4002),
   NODE_ENV: Joi.string()
@@ -8,11 +9,13 @@ export const validationSchema = Joi.object({
     .default('development'),
 
   // CORS
-  API_GATEWAY_URL: Joi.string()
-    .default('http://localhost:4000,https://localhost:4000')
-    .description('Comma-separated list of allowed origins'),
+
+  CORS_ORIGINS: Joi.string().required(),
+  CORS_METHODS: Joi.string().required(),
+  CORS_CREDENTIALS: Joi.string().required(),
 
   // Database
+  
   DB_TYPE: Joi.string().required(),
   DB_HOST: Joi.string().required(),
   DB_PORT: Joi.number().required(),
@@ -21,11 +24,20 @@ export const validationSchema = Joi.object({
   DB_NAME: Joi.string().required(),
 
   // RabbitMQ
-  RABBITMQ_USER: Joi.string().required(),
-  RABBITMQ_PASS: Joi.string().required(),
-  RABBITMQ_QUEUE: Joi.string().required(),
-  RABBITMQ_EXCHANGE: Joi.string().required(),
-  RABBITMQ_ROUTING_KEY: Joi.string().required(),
+
+  RMQ_UI_PORT: Joi.number().required(),
+  RMQ_HOST: Joi.string().required(),
+  RMQ_PORT: Joi.number().required(),
+  RMQ_USER: Joi.string().required(),
+  RMQ_PASSWORD: Joi.string().required(),
+  RMQ_BLOGS_QUEUE: Joi.string().required(),
+  RMQ_EXCHANGE: Joi.string().required(),
+  RMQ_ROUTING_KEY: Joi.string().required(),
+
+  // JWT
+
+  JWT_SECRET: Joi.string().required(),
+  JWT_EXPIRES_IN: Joi.string().required(),
 
 
 }); 
