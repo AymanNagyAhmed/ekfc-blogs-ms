@@ -8,6 +8,7 @@
 ## Prerequisites
 - Node.js (v22.11.0)
 - MongoDB
+- RabbitMQ
 
 ## Database Configurations
 - DB_HOST=127.0.0.1
