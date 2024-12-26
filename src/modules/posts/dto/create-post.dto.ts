@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePostDto {
@@ -22,7 +22,8 @@ export class CreatePostDto {
     example: '67668222525f0b148b57def3'
   })
   @IsString()
-  readonly userId: string;
+  @IsOptional()
+  readonly userId?: string;
 
 
 }

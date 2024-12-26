@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Req, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Req, Patch, UseFilters } from '@nestjs/common';
 import { MessagePattern, EventPattern } from '@nestjs/microservices';
 import { Request } from 'express';
 import { PostsService } from '@/modules/posts/posts.service';
@@ -9,9 +9,14 @@ import { UpdatePostDto } from '@/modules/posts/dto/update-post.dto';
 import { ApiResponseUtil } from '@/common/utils/api-response.util';
 import { HTTP_STATUS } from '@/common/constants/api.constants';
 import { ApiTags, ApiOperation, ApiResponse as SwaggerResponse } from '@nestjs/swagger';
+import { AllExceptionsFilter } from '@/common/filters/rpc-exception.filter';
+import { Logger } from '@nestjs/common';
 
 @Controller()
+@UseFilters(new AllExceptionsFilter())
 export class PostsController {
+    private readonly logger = new Logger(PostsController.name);
+
     constructor(private readonly postsService: PostsService) {}
 
     // Event Pattern Handlers
@@ -35,8 +40,11 @@ export class PostsController {
 
     // Message Pattern Handlers
     @MessagePattern({ cmd: 'create_post' })
-    async createPost(createPostDto: CreatePostDto): Promise<ApiResponse<PostSchema>> {
-        const post = await this.postsService.createPost(createPostDto);
+    async createPost(data: CreatePostDto): Promise<ApiResponse<PostSchema>> {
+        // Log the received data for debugging
+        this.logger.debug('Received create post data:', data);
+        
+        const post = await this.postsService.createPost(data);
         return ApiResponseUtil.success(
             post,
             'Post created successfully',
@@ -45,9 +53,9 @@ export class PostsController {
         );
     }
 
-    @MessagePattern({ cmd: 'get_posts' })
-    async getPosts(): Promise<ApiResponse<PostSchema[]>> {
-        const posts = await this.postsService.findAll();
+    @MessagePattern({ cmd: 'get_posts'})
+    async getPosts(data: { userId: string }): Promise<ApiResponse<PostSchema[]>> {
+        const posts = await this.postsService.findAll(data.userId);
         return ApiResponseUtil.success(
             posts,
             'Posts retrieved successfully',
@@ -56,8 +64,8 @@ export class PostsController {
     }
 
     @MessagePattern({ cmd: 'get_post' })
-    async getPost(data: { id: string }): Promise<ApiResponse<PostSchema>> {
-        const post = await this.postsService.findPostById(data.id);
+    async getPost(data: { id: string, userId: string }): Promise<ApiResponse<PostSchema>> {
+        const post = await this.postsService.findPost(data.id, data.userId);
         return ApiResponseUtil.success(
             post,
             'Post retrieved successfully',
@@ -66,11 +74,8 @@ export class PostsController {
     }
 
     @MessagePattern({ cmd: 'update_post' })
-    async updatePost(data: {
-        id: string;
-        updateData: UpdatePostDto;
-    }): Promise<ApiResponse<PostSchema>> {
-        const post = await this.postsService.updatePost(data.id, data.updateData);
+    async updatePost(data: {id: string, updateData: UpdatePostDto, userId: string}): Promise<ApiResponse<PostSchema>> {
+        const post = await this.postsService.updatePost(data.id, data.updateData, data.userId);
         return ApiResponseUtil.success(
             post,
             'Post updated successfully',
@@ -79,8 +84,8 @@ export class PostsController {
     }
 
     @MessagePattern({ cmd: 'delete_post' })
-    async deletePost(data: { id: string }): Promise<ApiResponse<void>> {
-        await this.postsService.deletePost(data.id);
+    async deletePost(data: { id: string, userId: string }): Promise<ApiResponse<void>> {
+        await this.postsService.deletePost(data.id, data.userId);
         return ApiResponseUtil.success(
             null,
             'Post deleted successfully',

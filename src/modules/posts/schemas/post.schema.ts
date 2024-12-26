@@ -1,5 +1,6 @@
 import { AbstractDocument } from '@/common/database/abstract.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 
 @Schema({
   timestamps: true,
@@ -21,11 +22,11 @@ export class Post extends AbstractDocument {
 
   @Prop({
     required: true,
-    type: String,
+    type: Types.ObjectId,
     index: true,
     immutable: true
   })
-  userId: string;
+  userId: Types.ObjectId;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

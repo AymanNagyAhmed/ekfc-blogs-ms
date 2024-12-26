@@ -9,6 +9,7 @@ import {
 } from 'mongoose';
 import { AbstractDocument } from '@/common/database/abstract.schema';
 import { ResourceNotFoundException } from '@/common/exceptions/resource-not-found.exception';
+import { UnauthorizedException } from '@nestjs/common';
 
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
   protected abstract readonly logger: Logger;
@@ -75,14 +76,12 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
    * Finds a single document in the database
    * @param filterQuery The filter query to apply
    * @returns The found document
-   * @throws NotFoundException if the document is not found
    */
   async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
     const document = await this.model.findOne(filterQuery, {}, { lean: true });
 
     if (!document) {
-      this.logger.warn('Document not found with filterQuery:', filterQuery);
-      throw new ResourceNotFoundException('Document');
+      return null;
     }
 
     return document as unknown as TDocument;

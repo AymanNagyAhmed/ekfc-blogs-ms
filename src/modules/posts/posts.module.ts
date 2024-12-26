@@ -6,6 +6,7 @@ import { Post, PostSchema } from '@/modules/posts/schemas/post.schema';
 import { PostsRepository } from '@/modules/posts/posts.repository';
 import { RmqModule } from '@/config/rmq/rmq.module';
 import { BLOGS_SERVICE } from '@/common/constants/services';
+import { AuthModule } from '@/common/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { BLOGS_SERVICE } from '@/common/constants/services';
       { name: Post.name, schema: PostSchema },
     ]),
     RmqModule.register({ name: BLOGS_SERVICE }),
+    AuthModule,
   ],
   controllers: [PostsController],
   providers: [
