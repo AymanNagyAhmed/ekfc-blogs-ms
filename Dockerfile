@@ -7,9 +7,7 @@ LABEL version="dev"
 LABEL description="posts Microservice development image"
 LABEL maintainer="AymanNagy.Ahmed@gmail.com"
 
-# Install npm
-RUN npm install -g npm@10.9.0
-RUN npm install yarn -g
+RUN if ! yarn --version; then npm install -g yarn@1.22.22; fi
 
 
 # Set working directory
@@ -31,7 +29,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Install dependencies first
 COPY package*.json ./
-RUN yarn ci
+RUN yarn install --no-lockfile
 
 # Copy the rest of the code
 COPY . .
