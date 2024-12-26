@@ -7,20 +7,15 @@ export const databaseProviders = [
     inject: [ConfigService],
     useFactory: async (configService: ConfigService): Promise<typeof mongoose> => {
       try {
-        // Build connection string from individual components if DATABASE_URL is not provided
-        const dbUrl = configService.get<string>('DATABASE_URL') || 
-          `${configService.get<string>('DB_TYPE')}://${
-            configService.get<string>('DB_USER')}:${
-            configService.get<string>('DB_PASSWORD')}@${
-            configService.get<string>('DB_HOST')}:${
-            configService.get<string>('DB_PORT')}/${
-            configService.get<string>('DB_NAME')}`;
+        const dbUrl = `${configService.get<string>('DB_TYPE')}://${
+          configService.get<string>('DB_USER')}:${
+          configService.get<string>('DB_PASSWORD')}@${
+          configService.get<string>('DB_HOST')}:${
+          configService.get<string>('DB_PORT')}/${
+          configService.get<string>('DB_NAME')}?authSource=admin`;
 
-        const connection = await mongoose.connect(dbUrl, {
-          dbName: configService.get<string>('DB_NAME'),
-        });
+        const connection = await mongoose.connect(dbUrl);
         
-        // Test the connection
         await connection.connection.db.command({ ping: 1 });
         console.log(`Successfully connected to MongoDB at ${configService.get<string>('DB_HOST')}:${configService.get<string>('DB_PORT')}`);
 

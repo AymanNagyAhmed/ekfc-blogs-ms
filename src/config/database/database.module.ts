@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DatabaseConfig } from '@/common/interfaces/database-config.interface';
 
-
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -16,14 +15,9 @@ import { DatabaseConfig } from '@/common/interfaces/database-config.interface';
           username: configService.get<string>('DB_USER'),
           password: configService.get<string>('DB_PASSWORD'),
         };
-        let uri = `${dbConfig.type}://${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
 
-        if(configService.get<string>('NODE_ENV') === 'development'){
-           let uri = `${dbConfig.type}://${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
-        }else{
-           let uri = `${dbConfig.type}://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
-        }
-
+        // Always use authentication for MongoDB
+        const uri = `${dbConfig.type}://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}?authSource=admin`;
 
         return {
           uri,
